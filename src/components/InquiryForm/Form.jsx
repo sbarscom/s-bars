@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
-// import React from 'react';
+import React from 'react';
 
 import { useTranslation } from '../../i18n';
 import useForm from '../Form/src/hooks/useForm';
@@ -13,6 +13,7 @@ import ValueSelectControl from '../Form/src/components/form-controls/ValueSelect
 import CheckBoxControl from '../Form/src/components/form-controls/CheckBoxControl';
 import BoxedInputControl from '../Form/src/components/form-controls/BoxedInputControl';
 import FormErrorMessage from '../Form/src/components/form-controls/FormErrorMessage';
+import AutofillTrapForm from '../Form/src/components/autofill-trap-form';
 
 import FormSection from './FormSection';
 
@@ -27,19 +28,11 @@ const styleSections = (t) => ({
 });
 
 const styleFooter = (t) => ({
-  [t.mq.lg]: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 3fr',
-  },
-});
-const styleFooterInner = (t) => ({
   display: 'flex',
   flexDirection: 'column',
   [t.mq.lg]: {
-    gridColumn: 2,
-    marginLeft: t.space[4],
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
@@ -220,82 +213,84 @@ const Form = ({ onSubmit }) => {
   };
 
   return (
-    <form onSubmit={handleOnSubmit} noValidate>
-      <HoneyPotInput value={values.email} onChange={handleOnChange} />
-      <div css={styleSections}>
-        <FormSection title={t('if.subject.title')} description={t('if.subject.description')}>
-          <ValueSelectControl
-            name="subject"
-            items={serviceItems}
-            required
-            value={values.subject}
-            error={errors.subject}
-            onChange={onSubjectChange}
-          />
-          <div css={{ display: isOtherItemSelected(values.subject) ? 'block' : 'none' }}>
-            <InputControl
-              label={OTHER}
-              name={OTHER_FIELD}
+    <React.Fragment>
+      <AutofillTrapForm />
+
+      <form onSubmit={handleOnSubmit} noValidate>
+        <HoneyPotInput value={values.email} onChange={handleOnChange} />
+        <div css={styleSections}>
+          <FormSection title={t('if.subject.title')} description={t('if.subject.description')}>
+            <ValueSelectControl
+              name="subject"
+              items={serviceItems}
               required
-              value={values[OTHER_FIELD]}
-              error={errors[OTHER_FIELD]}
+              value={values.subject}
+              error={errors.subject}
+              onChange={onSubjectChange}
+            />
+            <div css={{ display: isOtherItemSelected(values.subject) ? 'block' : 'none' }}>
+              <InputControl
+                label={OTHER}
+                name={OTHER_FIELD}
+                required
+                value={values[OTHER_FIELD]}
+                error={errors[OTHER_FIELD]}
+                onChange={handleOnChange}
+              />
+            </div>
+          </FormSection>
+
+          <FormSection title={t('if.message.title')} description={t('if.message.description')}>
+            <TextAreaControl
+              name="message"
+              value={values.message}
+              error={errors.message}
               onChange={handleOnChange}
             />
-          </div>
-        </FormSection>
+          </FormSection>
 
-        <FormSection title={t('if.message.title')} description={t('if.message.description')}>
-          <TextAreaControl
-            name="message"
-            value={values.message}
-            error={errors.message}
-            onChange={handleOnChange}
-          />
-        </FormSection>
-
-        <FormSection title={t('if.vc.title')} description={t('if.vc.description')}>
-          <BoxedInputControl
-            label={NAME}
-            name="name"
-            required
-            value={values.name}
-            error={errors.name}
-            onChange={handleOnChange}
-          />
-          <BoxedInputControl
-            label={POSITION}
-            name="position"
-            value={values.position}
-            error={errors.position}
-            onChange={handleOnChange}
-          />
-          <BoxedInputControl
-            label={COMPANY}
-            name="company"
-            value={values.company}
-            error={errors.company}
-            onChange={handleOnChange}
-          />
-          <BoxedInputControl
-            label={PHONE}
-            name="phone"
-            type="phone"
-            required
-            value={values.phone}
-            error={errors.phone}
-            onChange={handleOnChange}
-          />
-          <BoxedInputControl
-            label={EMAIL}
-            name={EMAIL_FIELD}
-            type="email"
-            value={values[EMAIL_FIELD]}
-            error={errors[EMAIL_FIELD]}
-            onChange={handleOnChange}
-          />
-        </FormSection>
-        <div css={styleFooter}>
-          <div css={styleFooterInner}>
+          <FormSection title={t('if.vc.title')} description={t('if.vc.description')}>
+            <BoxedInputControl
+              label={NAME}
+              name="name"
+              required
+              value={values.name}
+              error={errors.name}
+              onChange={handleOnChange}
+            />
+            <BoxedInputControl
+              label={POSITION}
+              name="position"
+              value={values.position}
+              error={errors.position}
+              onChange={handleOnChange}
+            />
+            <BoxedInputControl
+              label={COMPANY}
+              name="company"
+              value={values.company}
+              error={errors.company}
+              onChange={handleOnChange}
+            />
+            <BoxedInputControl
+              label={PHONE}
+              name="phone"
+              type="phone"
+              required
+              value={values.phone}
+              error={errors.phone}
+              onChange={handleOnChange}
+            />
+            <BoxedInputControl
+              label={EMAIL}
+              name={EMAIL_FIELD}
+              type="email"
+              value={values[EMAIL_FIELD]}
+              error={errors[EMAIL_FIELD]}
+              onChange={handleOnChange}
+            />
+          </FormSection>
+          <div css={styleFooter}>
             <CheckBoxControl
               label={<PrivacyLabel />}
               name="privacy"
@@ -310,8 +305,8 @@ const Form = ({ onSubmit }) => {
             {hasErrors() && <FormErrorMessage>{t('form.has_input_errors')}</FormErrorMessage>}
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </React.Fragment>
   );
 };
 
