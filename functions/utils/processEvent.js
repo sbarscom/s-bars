@@ -1,8 +1,34 @@
-const { SENDGRID_API_KEY, SENDGRID_TO_EMAIL, URL } = process.env;
+const { SENDGRID_API_KEY, SENDGRID_TO_EMAIL, URL, SITE_NAME, DEPLOY_URL } = process.env;
 
 const { sanitizeField, validateField } = require('./field-utils');
 
-const validateOrigin = (event) => !event.headers.origin || event.headers.origin === URL;
+const getDeployDomainName = () => {
+  const { hostname } = new URL(DEPLOY_URL);
+  const domainName = hostname.replace(/^[^.]+\./g, '');
+  return domainName;
+};
+
+const validateOrigin = (event) => {
+  if (!event.headers.origin) {
+    return true;
+  }
+
+  if (event.headers.origin === URL) {
+    return true;
+  }
+
+  const { hostname } = new URL(event.headers.origin);
+  const domainName = hostname.replace(/^[^.]+\./g, '');
+
+  const deployDomainName = getDeployDomainName();
+  if (domainName !== deployDomainName) {
+    return false;
+  }
+
+  const [name] = hostname.split('.');
+  return name === SITE_NAME;
+};
+
 const isSpam = (body) => body.email;
 
 const getSanitizedValues = (body, fields) => {
