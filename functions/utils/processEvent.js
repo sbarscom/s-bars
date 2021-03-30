@@ -22,8 +22,10 @@ const getSanitizedValues = (body, fields) => {
 };
 
 const processEvent = async (sgMail, event, fields, subject) => {
+  console.warn(event.headers.origin, URL);
   if (!validateOrigin(event)) {
-    return { statusCode: 401, body: 'Bad origin' };
+    // return { statusCode: 401, body: 'Bad origin' };
+    return { statusCode: 401, body: `Bad origin ${event.headers.origin} ${URL}` };
   }
 
   if (event.httpMethod !== 'POST') {
