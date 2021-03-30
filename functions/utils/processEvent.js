@@ -1,7 +1,4 @@
-/**
- * 1
- */
-const UrlAPI = require('url');
+const urlAPI = require('url');
 
 const { SENDGRID_API_KEY, SENDGRID_TO_EMAIL, URL, SITE_NAME, DEPLOY_URL } = process.env;
 const { sanitizeField, validateField } = require('./field-utils');
@@ -9,7 +6,7 @@ const { sanitizeField, validateField } = require('./field-utils');
 const getDomainName = (s) => s.replace(/^[^.]+\./g, '');
 
 const getDeployDomainName = () => {
-  const { hostname } = new UrlAPI(DEPLOY_URL);
+  const { hostname } = urlAPI.parse(DEPLOY_URL);
   const domainName = getDomainName(hostname);
   return domainName;
 };
@@ -23,7 +20,7 @@ const validateOrigin = (event) => {
     return true;
   }
 
-  const { hostname } = new UrlAPI(event.headers.origin.toString());
+  const { hostname } = urlAPI.parse(event.headers.origin.toString());
   const domainName = getDomainName(hostname);
 
   const deployDomainName = getDeployDomainName();
