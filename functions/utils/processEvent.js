@@ -1,11 +1,16 @@
-const urlapi = require('url');
+/**
+ * 1
+ */
+const UrlAPI = require('url');
 
 const { SENDGRID_API_KEY, SENDGRID_TO_EMAIL, URL, SITE_NAME, DEPLOY_URL } = process.env;
 const { sanitizeField, validateField } = require('./field-utils');
 
+const getDomainName = (s) => s.replace(/^[^.]+\./g, '');
+
 const getDeployDomainName = () => {
-  const { hostname } = urlapi.parse(DEPLOY_URL);
-  const domainName = hostname.replace(/^[^.]+\./g, '');
+  const { hostname } = new UrlAPI(DEPLOY_URL);
+  const domainName = getDomainName(hostname);
   return domainName;
 };
 
@@ -18,8 +23,8 @@ const validateOrigin = (event) => {
     return true;
   }
 
-  const { hostname } = urlapi.parse(event.headers.origin);
-  const domainName = hostname.replace(/^[^.]+\./g, '');
+  const { hostname } = new UrlAPI(event.headers.origin.toString());
+  const domainName = getDomainName(hostname);
 
   const deployDomainName = getDeployDomainName();
   if (domainName !== deployDomainName) {
@@ -49,10 +54,10 @@ const getSanitizedValues = (body, fields) => {
 };
 
 const processEvent = async (sgMail, event, fields, subject) => {
-  console.warn(event.headers.origin, URL);
+  console.warn(event.headers.origin, URL, SITE_NAME, DEPLOY_URL);
   if (!validateOrigin(event)) {
     // return { statusCode: 401, body: 'Bad origin' };
-    return { statusCode: 401, body: `Bad origin ${event.headers.origin} ${URL}` };
+    return { statusCode: 401, body: `Bad origin ${event.headers.origin} ${URL} ${SITE_NAME} ${DEPLOY_URL}` };
   }
 
   if (event.httpMethod !== 'POST') {
