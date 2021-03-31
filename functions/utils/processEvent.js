@@ -1,6 +1,14 @@
 const urlAPI = require('url');
+const emailValidator = require('email-validator');
 
-const { SENDGRID_API_KEY, SENDGRID_TO_EMAIL, URL, SITE_NAME, DEPLOY_URL } = process.env;
+const {
+  SENDGRID_API_KEY,
+  SENDGRID_SINGLE_SENDER,
+  TO_EMAIL,
+  URL,
+  SITE_NAME,
+  DEPLOY_URL,
+} = process.env;
 const { sanitizeField, validateField } = require('./field-utils');
 
 const getDomainName = (s) => s.replace(/^[^.]+\./g, '');
@@ -50,21 +58,33 @@ const getSanitizedValues = (body, fields) => {
   return result;
 };
 
-const processEvent = async (sgMail, event, fields, subject) => {
-  console.warn(event.headers.origin, URL, SITE_NAME, DEPLOY_URL);
+const processEvent = async (event, sgMail, fields, subject) => {
+  // console.warn(event.headers.origin, URL);
   if (!validateOrigin(event)) {
-    // return { statusCode: 401, body: 'Bad origin' };
-    return { statusCode: 401, body: `Bad origin ${event.headers.origin} ${URL} ${SITE_NAME} ${DEPLOY_URL}` };
+    return { statusCode: 401, body: 'Bad origin' };
+    // return { statusCode: 401, body: `Bad origin ${event.headers.origin} ${URL}` };
   }
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed', headers: { Allow: 'POST' } };
   }
 
-  if (!SENDGRID_API_KEY || !SENDGRID_TO_EMAIL) {
+  if (!SENDGRID_API_KEY) {
     return {
       statusCode: 500,
-      body: 'process.env.{vars} must be defined',
+      body: 'SENDGRID_API_KEY must be defined',
+    };
+  }
+  if (!emailValidator.validate(SENDGRID_SINGLE_SENDER)) {
+    return {
+      statusCode: 500,
+      body: `SENDGRID_SINGE_SENDER {${SENDGRID_SINGLE_SENDER}} not valid email address`,
+    };
+  }
+  if (!emailValidator.validate(TO_EMAIL)) {
+    return {
+      statusCode: 500,
+      body: `TO_EMAIL {${TO_EMAIL}} not valid email address`,
     };
   }
 
@@ -93,13 +113,14 @@ const processEvent = async (sgMail, event, fields, subject) => {
     return `${name}: ${sanitized[k]}`;
   });
 
+  // aBody.splice(0, 0, URL, '-'.repeat(20));
   const html = aBody.join('<br><br>');
   const text = aBody.join('\n\n');
 
   const msg = {
-    to: SENDGRID_TO_EMAIL,
-    from: SENDGRID_TO_EMAIL,
-    subject,
+    to: TO_EMAIL,
+    from: SENDGRID_SINGLE_SENDER,
+    subject: `${SITE_NAME}: ${subject}`,
     text,
     html,
   };
