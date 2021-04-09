@@ -13,7 +13,7 @@ const { contentDir, postsDir, pageDirs, cardsPerPage, noRobots } = config;
 const CSP = {
   'default-src': "'self'",
   'prefetch-src': "'self'",
-  'connect-src': "'self' *.google-analytics.com",
+  'connect-src': "'self' *.google-analytics.com stats.g.doubleclick.net",
   'manifest-src': "'self'",
   'style-src': "'self' 'unsafe-inline'",
   'font-src': "'self' data:",
