@@ -110,7 +110,6 @@ module.exports = {
       },
     },
     'gatsby-plugin-react-helmet',
-    /*
     {
       resolve: 'gatsby-plugin-google-analytics',
       options: {
@@ -121,7 +120,6 @@ module.exports = {
         respectDNT: false,
       },
     },
-        */
     {
       resolve: 'gatsby-plugin-manifest',
       options: {

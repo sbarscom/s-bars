@@ -79,7 +79,7 @@ module.exports = {
    *  */
   twitterCreator: '',
 
-  googleAnalyticsID: '',
+  googleAnalyticsID: 'UA-24264154-1',
 
   /**
    * webmanifest
