@@ -5,15 +5,33 @@ const path = require('path');
 const getCSP = require('@alextim/csp');
 
 const i18n = require('./src/i18n/i18n');
-const config = require('./config/website');
-const locales = require('./config/locales');
+const config = require('./s-bars.content/config/website');
+const locales = require('./s-bars.content/config/locales');
 
 const manifestIconSrc = path.join(__dirname, 'src', 'assets', 'images', 'icon.png');
 
-const { contentDir, postDirs, pageDirs, cardsPerPage, noRobots } = config;
+const { contentDir, postDirs, pageDirs, cardsPerPage } = config;
+
+const toBoolean = (x) => {
+  if (!x) {
+    return false;
+  }
+  if (typeof x === 'boolean') {
+    return x;
+  }
+  if (typeof x === 'number') {
+    return !!x;
+  }
+  return typeof x === 'string' && x.trim().toLowerCase() === 'true';
+};
+
+const noIndex = toBoolean(process.env.NO_INDEX);
+
+// eslint-disable-next-line no-console
+console.log(`Robots and indexing: ${noIndex ? 'DISABLED' : 'ENABLED'}`);
 
 const headerForAll = [`Content-Security-Policy: ${getCSP(!!config.googleAnalyticsID, true, true)}`];
-if (config.noRobots) {
+if (noIndex) {
   headerForAll.push('X-Robots-Tag: noindex, nofollow');
 }
 
@@ -29,7 +47,7 @@ const pageSources = Object.keys(allDirs).map((name) => ({
   resolve: 'gatsby-source-filesystem',
   options: {
     name,
-    path: `${__dirname}/${contentDir}/${allDirs[name]}`,
+    path: path.join(__dirname, contentDir, allDirs[name]),
   },
 }));
 
@@ -215,6 +233,7 @@ const plugins = [
       templatesDir: path.join(__dirname, 'src', config.templatesDir),
       pageDirs,
       i18n,
+      noIndex,
     },
   },
   {
@@ -224,18 +243,17 @@ const plugins = [
       templatesDir: path.join(__dirname, 'src', config.templatesDir, 'blog'),
       cardsPerPage,
       postDirs,
-      CREATE_TAG_PAGES: false,
-      CREATE_CATEGORY_PAGES: false,
-      CREATE_YEAR_PAGES: false,
       i18n,
+      noIndex,
     },
   },
   {
     resolve: '@alextim/at-sitemap',
+    // resolve: 'at-sitemap',
     options: {
       createRobotsTxt: true,
-      noRobots,
       ignoreImagesWithoutAlt: false,
+      noIndex,
     },
   },
 ];
